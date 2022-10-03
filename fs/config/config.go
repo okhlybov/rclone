@@ -374,15 +374,19 @@ var ErrorConfigFileNotFound = errors.New("config file not found")
 func SaveConfig() {
 	ctx := context.Background()
 	ci := fs.GetConfig(ctx)
-	var err error
-	for i := 0; i < ci.LowLevelRetries+1; i++ {
-		if err = LoadedData().Save(); err == nil {
-			return
+	if !ci.ImmutableConfig {
+		var err error
+		for i := 0; i < ci.LowLevelRetries+1; i++ {
+			if err = LoadedData().Save(); err == nil {
+				return
+			}
+			waitingTimeMs := mathrand.Intn(1000)
+			time.Sleep(time.Duration(waitingTimeMs) * time.Millisecond)
 		}
-		waitingTimeMs := mathrand.Intn(1000)
-		time.Sleep(time.Duration(waitingTimeMs) * time.Millisecond)
+		fs.Errorf(nil, "Failed to save config after %d tries: %v", ci.LowLevelRetries, err)
+	} else {
+		fs.Debugf(nil, "Disable writes to the config file on request")
 	}
-	fs.Errorf(nil, "Failed to save config after %d tries: %v", ci.LowLevelRetries, err)
 }
 
 // SetValueAndSave sets the key to the value and saves just that

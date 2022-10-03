@@ -135,6 +135,7 @@ type ConfigInfo struct {
 	KvLockTime             time.Duration // maximum time to keep key-value database locked by process
 	DisableHTTPKeepAlives  bool
 	Metadata               bool
+	ImmutableConfig        bool
 }
 
 // NewConfig creates a new config with everything set to the default
